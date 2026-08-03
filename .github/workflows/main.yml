@@ -12,15 +12,16 @@ jobs:
       - name: Install & Setup
         run: |
           sudo hostnamectl set-hostname hrv-clan
+          echo 'runner:123' | sudo chpasswd
           curl -fsSL https://tailscale.com/install.sh | sh
-          sudo tailscale up --authkey=${{ secrets.KEY }} --hostname=hrv-clan-${{ github.run_id }} --ssh
+          sudo tailscale up --authkey=${{ secrets.KEY }} --hostname=hrv-clan-${{ github.run_id }}
 
       - name: Running
         run: |
-          echo "✅ - The virtual machine is ready!"
+          echo "[+] - The virtual machine is ready!"
       - name: Keep Alive
         run: |
           while true; do
-            echo "[$(date)] - Linux VPS is running..."
+            echo "[$(date)] - The virtual machine is running..."
             sleep 300
           done
