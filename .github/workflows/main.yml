@@ -1,0 +1,26 @@
+name: Hrv Clan
+
+on:
+  workflow_dispatch:
+
+jobs:
+  linux:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+
+    steps:
+      - name: Install & Setup
+        run: |
+          sudo hostnamectl set-hostname hrv-clan
+          curl -fsSL https://tailscale.com/install.sh | sh
+          sudo tailscale up --authkey=${{ secrets.TAILSCALE_AUTH_KEY }} --hostname=hrv-clan-${{ github.run_id }} --ssh
+
+      - name: Running
+        run: |
+          echo "✅ - The virtual machine is ready!"
+      - name: Keep Alive
+        run: |
+          while true; do
+            echo "[$(date)] - Linux VPS is running..."
+            sleep 300
+          done
