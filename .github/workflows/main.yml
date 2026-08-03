@@ -13,7 +13,7 @@ jobs:
         run: |
           sudo hostnamectl set-hostname hrv-clan
           curl -fsSL https://tailscale.com/install.sh | sh
-          sudo tailscale up --authkey=${{ secrets.TAILSCALE_AUTH_KEY }} --hostname=hrv-clan-${{ github.run_id }} --ssh
+          sudo tailscale up --authkey=${{ secrets.KEY }} --hostname=hrv-clan-${{ github.run_id }} --ssh
 
       - name: Running
         run: |
