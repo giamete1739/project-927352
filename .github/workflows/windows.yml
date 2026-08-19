@@ -1,0 +1,38 @@
+name: Windows
+
+on:
+  workflow_dispatch:
+
+jobs:
+  win:
+    runs-on: windows-latest
+    timeout-minutes: 360
+
+    steps:
+      - name: Enable Remote
+        run: |
+          Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
+          Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+          Restart-Service -Name TermService -Force
+      - name: Setup User
+        run: |
+          $password = "Abc@12345678"
+          $securePass = ConvertTo-SecureString $password -AsPlainText -Force
+          New-LocalUser -Name "User" -Password $securePass -AccountNeverExpires
+          Add-LocalGroupMember -Group "Administrators" -Member "User"
+          Add-LocalGroupMember -Group "Remote Desktop Users" -Member "User"
+      - name: Install Tailscale
+        run: |
+          $url = "https://pkgs.tailscale.com/stable/tailscale-setup-latest-amd64.msi"
+          $out = "$env:TEMP\tailscale.msi"
+          Invoke-WebRequest -Uri $url -OutFile $out
+          Start-Process msiexec.exe -ArgumentList "/i $out /quiet /norestart" -Wait
+      - name: Connect Tailscale
+        run: |
+          & "$env:ProgramFiles\Tailscale\tailscale.exe" up --authkey=${{ secrets.KEY }} --hostname=windows-${{ github.run_id }}
+      - name: Keep Alive
+        run: |
+          while ($true) {
+            Write-Host "[$(Get-Date)] Running..."
+            Start-Sleep -Seconds 300
+          }
